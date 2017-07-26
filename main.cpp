@@ -144,12 +144,9 @@ int main(void)
         model = glm::rotate(model,glm::radians(-55.0f),glm::vec3(1.0f,0.0f,0.0f));
         view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT,0.1f,100.0f);
-        //get matrix uniform locations
-        unsigned int modelLoc = glGetUniformLocation(ourShader.ID,"model");
-        unsigned int viewLoc = glGetUniformLocation(ourShader.ID,"view");
-        //Pass them to the shaders
-        glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc,1,GL_FALSE,&view[0][0]);
+        //Set unfiroms
+        ourShader.setMat4("model",model);
+        ourShader.setMat4("view",view);
         ourShader.setMat4("projection",projection);
 
 
