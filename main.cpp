@@ -49,43 +49,6 @@ int main(void)
         return -1;
     }
     Shader ourShader("vertexShader.s", "fragShader.s"); 
-    // //***BUILD AND COMPILE SHADER PROGRAMS***
-    // //----------------------------------
-    // // vertex shader
-    // int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    // glCompileShader(vertexShader);
-    // int success;
-    // char infoLog[512];
-    // glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    // if (!success)
-    // {
-    //     glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    //     std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    // }
-    // // fragment shader
-    // int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    // glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    // glCompileShader(fragmentShader);
-    // glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    // if (!success)
-    // {
-    //     glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    //     std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    // }
-    // // link shaders
-    // int shaderProgram = glCreateProgram();
-    // glAttachShader(shaderProgram, vertexShader);
-    // glAttachShader(shaderProgram, fragmentShader);
-    // glLinkProgram(shaderProgram);
-    // // check for linking errors
-    // glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    // if (!success) {
-    //     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    //     std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    // }
-    // glDeleteShader(vertexShader);
-    // glDeleteShader(fragmentShader);
     GLfloat vertices[] = {
     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
      0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom right
@@ -148,18 +111,6 @@ int main(void)
         ourShader.setMat4("model",model);
         ourShader.setMat4("view",view);
         ourShader.setMat4("projection",projection);
-
-
-        // glm::mat4 transform;
-        // transform = glm::translate(transform, glm::vec3(0.5f,-0.5f,0.0f));
-        // transform = glm::rotate(transform,(float)glfwGetTime(), glm::vec3(0.0f,0.0f,1.0f));
-        // ourShader.use();
-        // unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-        // float timeValue = glfwGetTime();
-        // float greenValue = sin(8*timeValue) / 2.0f + 0.5f;
-        // int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        // glUniform4f(vertexColorLocation, 0.0f, 0.5f, greenValue, 1.0f);
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0);
