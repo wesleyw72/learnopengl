@@ -51,6 +51,7 @@ int main(void)
         return -1;
     }
     Shader ourShader("vertexShader.s", "fragShader.s"); 
+    
     glEnable(GL_DEPTH_TEST);
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -107,86 +108,28 @@ int main(void)
       glm::vec3( 1.5f,  0.2f, -1.5f), 
       glm::vec3(-1.3f,  1.0f, -1.5f)  
     };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };  
 
     //***SETUP VBO AND VAO OBJECTS (Vertex Buffer/Array Objects)***
-    unsigned int VBO, VAO, EBO;
-    glGenBuffers(1,&EBO);
-    glGenVertexArrays(1, &VAO);
+    unsigned int VBO, cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
+    glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+ 
+    //positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // // color attribute
-    // glVertexAttribPointer(1, 3, GL_FLOAT , GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    // glEnableVertexAttribArray(1);
-    // texture attributes
-    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5 * sizeof(float),(void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-  
-     
-    //Load Texture
-    unsigned int texture,texture2;
-    // texture 1
-    glGenTextures(1,&texture);
-    glBindTexture(GL_TEXTURE_2D,texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char *data = stbi_load("container.jpg",&width,&height,&nrChannels,0);
-    if(data)
-    {
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Couldn't load image data" << std::endl;
-    }
-    
-    stbi_image_free(data);
-    
-    glGenTextures(1,&texture2);
-    glBindTexture(GL_TEXTURE_2D,texture2);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load("awesomeface.png",&width,&height,&nrChannels,0);
-    if(data)
-    {
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Couldn't load image data" << std::endl;
-    }
-    
-    stbi_image_free(data);
 
-    /* Loop until the user closes the window */
-    ourShader.use();
-    ourShader.setInt("texture1",0);
-    ourShader.setInt("texture2", 1); // or with shader class
+    //Setup Light VAO
+    unsigned int lightVAO;
+    glGenVertexArrays(1,&lightVAO);
+    glBindVertexArray(lightVAO);
+    glBindBuffer(GL_ARRAY_BUFFER,VBO);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+    glEnableVertexAttribArray(0);
+    
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -195,33 +138,32 @@ int main(void)
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+
         ourShader.use();
         //translation
 
         glm::mat4 view;
         glm::mat4 projection;
-        
+        //Set lighting uniforms
+        ourShader.setVec3("objectColor",1.0f,0.5f,0.31f);
+        ourShader.setVec3("lightColor",1.0f,1.0f,1.0f);
+
+        //view/projection transformations
         view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT,0.1f,100.0f);
         //Set unfiroms
         ourShader.setMat4("view",view);
         ourShader.setMat4("projection",projection);
 
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        for (unsigned int i = 0;i < 10;i++)
-        {
-            glm::mat4 model;
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model,glm::radians(angle)+(float)glfwGetTime(),glm::vec3(1.0f,0.3f,0.5f));
-            ourShader.setMat4("model",model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        glm::mat4 model;
+
+        model = glm::rotate(model,glm::radians(20.0f)+(float)glfwGetTime(),glm::vec3(1.0f,0.3f,0.5f));
+        ourShader.setMat4("model",model);
+        glBindVertexArray(cubeVAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+       
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -229,7 +171,8 @@ int main(void)
     }
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &lightVAO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
