@@ -202,22 +202,26 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture2);
         ourShader.use();
         //translation
-        glm::mat4 model;
+
         glm::mat4 view;
         glm::mat4 projection;
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f)); 
+        
         view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT,0.1f,100.0f);
         //Set unfiroms
-        ourShader.setMat4("model",model);
         ourShader.setMat4("view",view);
         ourShader.setMat4("projection",projection);
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        // glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        // glBindVertexArray(0); // no need to unbind it every time 
- 
+        for (unsigned int i = 0;i < 10;i++)
+        {
+            glm::mat4 model;
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model,glm::radians(angle)+(float)glfwGetTime(),glm::vec3(1.0f,0.3f,0.5f));
+            ourShader.setMat4("model",model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
