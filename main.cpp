@@ -18,6 +18,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 }   
+// lighting
+glm::vec3 lightPos(0.0f, 0.3f, 2.0f);
 int main(void)
 {
     
@@ -114,10 +116,10 @@ int main(void)
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(cubeVAO);
+    
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
- 
+    glBindVertexArray(cubeVAO);
     //positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -127,7 +129,7 @@ int main(void)
     glGenVertexArrays(1,&lightVAO);
     glBindVertexArray(lightVAO);
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)0);
     glEnableVertexAttribArray(0);
     
     while (!glfwWindowShouldClose(window))
@@ -161,6 +163,14 @@ int main(void)
         ourShader.setMat4("model",model);
         glBindVertexArray(cubeVAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        //Draw lamp object
+        lampShader.use();
+        lampShader.setMat4("view",view);
+        lampShader.setMat4("projection",projection);
+        model = glm::mat4();
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lampShader.setMat4("model", model);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
        
