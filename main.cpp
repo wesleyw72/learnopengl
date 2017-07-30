@@ -51,7 +51,7 @@ int main(void)
         return -1;
     }
     Shader ourShader("vertexShader.s", "fragShader.s"); 
-    
+    Shader lampShader("lamp.vs","lamp.fs");
     glEnable(GL_DEPTH_TEST);
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
