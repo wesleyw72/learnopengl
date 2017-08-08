@@ -150,7 +150,12 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
     glEnableVertexAttribArray(0);
-    
+    ourShader.use();
+
+    ourShader.setVec3("material.ambient",  1.0f, 0.5f, 0.31f);
+    ourShader.setVec3("material.diffuse",  1.0f, 0.5f, 0.31f);
+    ourShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    ourShader.setFloat("material.shininess", 32.0f);
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
@@ -168,10 +173,15 @@ int main(void)
 
         
         glm::mat4 projection;
+        //Set material uniforms
+        ourShader.setVec3("light.ambient",0.2f,0.2f,0.2f);
+        ourShader.setVec3("light.diffuse",0.5f,0.5f,0.5f);
+        ourShader.setVec3("light.specular",1.0f,1.0f,1.0f);
         //Set lighting uniforms
         ourShader.setVec3("objectColor",1.0f,0.5f,0.31f);
         ourShader.setVec3("lightColor",1.0f,1.0f,1.0f);
         ourShader.setVec3("lightPos",lightPos);
+        ourShader.setVec3("viewPos", camera.Position);
         //Camera/view transformation
         glm::mat4 view;
         view = camera.GetViewMatrix();
